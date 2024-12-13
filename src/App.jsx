@@ -12,12 +12,6 @@ const DEFAULT_FEEDBACK_DATA = {
   bad: 0,
 };
 
-// const hanleClickByOption = option => {
-//   setDEFAULT_FEEDBACK_DATA(prev => ({
-//     ...prev, [option]: prev[option] + 1
-//   }));
-// };
-
 const getLSFeedbackData = () => {
   return JSON.parse(localStorage.getItem('feedback-data')) || DEFAULT_FEEDBACK_DATA;
 };
@@ -25,15 +19,38 @@ const getLSFeedbackData = () => {
 function App() {
   const [feedback, setFeedback] = useState(getLSFeedbackData);
 
+
+  useEffect(() => {
+    const resetOnLoad = () => setFeedback(DEFAULT_FEEDBACK_DATA);
+    window.addEventListener('load', resetOnLoad);
+
+    return () => {
+      window.removeEventListener('load', resetOnLoad);
+    };
+  }, []);
+
+
   useEffect(() => {
     localStorage.setItem('feedback-data', JSON.stringify(feedback));
   }, [feedback]);
 
-  const updateFeedback = feedbackType => {
-    if (feedbackType === 'reset'){
+ 
+  const handleClickOutside = () => {
+    setFeedback(DEFAULT_FEEDBACK_DATA);
+  };
+
+  useEffect(() => {
+    window.addEventListener('click', handleClickOutside);
+
+    return () => {
+      window.removeEventListener('click', handleClickOutside);
+    };
+  }, []);
+
+  const updateFeedback = (feedbackType) => {
+    if (feedbackType === 'reset') {
       setFeedback(DEFAULT_FEEDBACK_DATA);
-    }
-    else {
+    } else {
       setFeedback({
         ...feedback,
         [feedbackType]: feedback[feedbackType] + 1,
@@ -43,9 +60,9 @@ function App() {
 
   const totalFeedback = feedback.good + feedback.neutral + feedback.bad;
   const positiveFeedback = Math.round((feedback.good / totalFeedback) * 100);
-  
+
   return (
-    <>
+    <div onClick={(e) => e.stopPropagation()}>
       <Description />
       <Options updateFeedback={updateFeedback} isVisible={!totalFeedback} />
       {totalFeedback ? (
@@ -54,10 +71,11 @@ function App() {
           totalFeedback={totalFeedback}
           positiveFeedback={positiveFeedback}
         />
-      ) : (<Notification />)}
-    </>
+      ) : (
+        <Notification message="No feedback yet" />
+      )}
+    </div>
   );
-
 }
 
 export default App;
