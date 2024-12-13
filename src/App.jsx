@@ -26,7 +26,7 @@ function App() {
   const [feedback, setFeedback] = useState(getLSFeedbackData);
 
   useEffect(() => {
-    localStorage.setItem('feedback-data', JSON.stringif(feedback));
+    localStorage.setItem('feedback-data', JSON.stringify(feedback));
   }, [feedback]);
 
   const updateFeedback = feedbackType => {
